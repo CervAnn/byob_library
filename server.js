@@ -32,7 +32,33 @@ app.get('/api/v1/patrons/:id', (request, response) => {
         response.status(200).json(patrons);
       } else {
         response.status(404).json({ 
-          error: `Could not find patron based on the id provided (${request.params.id})`
+          error: `We could not find patron based on the id provided (${request.params.id})`
+        });
+      }
+    })
+    .catch(error => {
+      response.status(500).json({ error });
+    });
+});
+
+app.get('/api/v1/library_loans', (request, response) => {
+  database('library_loans').select()
+    .then(loans => {
+      response.status(200).json(loans);
+    })
+    .catch(error => {
+      response.status(500).json({ error });
+    });
+});
+
+app.get('/api/v1/library_loans/:id', (request, response) => {
+  database('library_loans').where('id', request.params.id).select()
+    .then(loans => {
+      if (loans.length) {
+        response.status(200).json(loans);
+      } else {
+        response.status(404).json({ 
+          error: `We could not find the loaned item based on the id provided (${request.params.id})`
         });
       }
     })

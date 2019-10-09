@@ -67,6 +67,46 @@ app.get('/api/v1/library_loans/:id', (request, response) => {
     });
 });
 
+app.post('/api/v1/patrons', (request, response) => {
+  const patron = request.body;
+
+  for (let requiredParameter of ['first_name', 'last_name', 'email', 'address', 'phone_number', 'overdue_fees']) {
+    if (!patron[requiredParameter]) {
+      return response
+        .status(422)
+        .send({ error: `Expected format: { 'first_name': <String>, 'last_name': <String>, 'email': <String>, 'address': <String>, 'phone_number': <String>, 'overdue_fees': <String> }. You're missing a "${requiredParameter}" property.` });
+    }
+  }
+
+  database('patrons').insert(patron, 'id')
+    .then(patron => {
+      response.status(201).json({ id: patron[0] })
+    })
+    .catch(error => {
+      response.status(500).json({ error });
+    });
+});
+
+app.post('/api/v1/library_loans', (request, response) => {
+  const loan = request.body;
+
+  for (let requiredParameter of ['title', 'author', 'ISBN', 'overdue']) {
+    if (!loan[requiredParameter]) {
+      return response
+        .status(422)
+        .send({ error: `Expected format: { 'title': <String>, 'author': <String>, 'ISBN': <String>, 'overdue': <String> }. You're missing a "${requiredParameter}" property.` });
+    }
+  }
+
+  database('library_loans').insert(loan, 'id')
+    .then(loan => {
+      response.status(201).json({ id: loan[0] })
+    })
+    .catch(error => {
+      response.status(500).json({ error });
+    });
+});
+
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
 });

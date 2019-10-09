@@ -1,46 +1,47 @@
-exports.seed = function(knex) {
+const libraryPatronData = require('../../../libraryPatronData');
+
+const createPatron = (knex, patron) => {
+  return knex('patrons').insert({
+    first_name: patron.first_name,
+    last_name: patron.last_name,
+    email: patron.email,
+    address: patron.address,
+    phone_number: patron.phone_number,
+    overdue_fees: patron.overdue_fees
+  }, 'id')
+    .then(patronId => {
+      let loanPromises = [];
+
+      patron.library_loans.forEach(loan => {
+        loanPromises.push(
+          createLoan(knex, {
+            title: loan.title,
+            author: loan.author,
+            ISBN: loan.ISBN,
+            overdue: loan.overdue,
+            patron_id: patronId[0]
+          })
+        )
+      });
+      return Promise.all(loanPromises);
+    })
+};
+
+const createLoan = (knex, loan) => {
+  return knex('library_loans').insert(loan);
+}
+
+exports.seed = (knex) => {
   return knex('library_loans').del()
     .then(() => knex('patrons').del())
     .then(() => {
-      return Promise.all([
-        
-        // Insert a single paper, return the paper ID, insert 2 footnotes
-        knex('patrons').insert({
-          first_name: "Raymond",
-          last_name: "Insall",
-          email: "rinsall0@dot.gov",
-          address: "21481 Gina Park",
-          phone_number: "730-614-3737",
-          overdue_fees: "$6.17"
-        }, 'id')
-        .then(patron => {
-          return knex('library_loans').insert([
-            {
-              title: "erat nulla tempus vivamus",
-              author: "Rafael Pittway",
-              ISBN: "621650931-4",
-              overdue: true,
-              patron_id: patron[0]
-            },
-            {
-              title: "mattis nibh ligula",
-              author: "Tadeas Jobke",
-              ISBN: "888516458-7",
-              overdue: true,
-              patron_id: patron[0]
-            },
-            {
-              title: "donec odio justo",
-              author: "Nerta Laxe",
-              ISBN: "957764532-1",
-              overdue: false,
-              patron_id: patron[0]
-            }
-          ])
-        })
-        .then(() => console.log('Seeding complete!'))
-        .catch(error => console.log(`Error seeding data: ${error}`))
-      ])
+      let patronPromises = [];
+
+      libraryPatronData.forEach(patron => {
+        patronPromises.push(createPatron(knex, patron));
+      });
+
+      return Promise.all(patronPromises);
     })
     .catch(error => console.log(`Error seeding data: ${error}`));
 };

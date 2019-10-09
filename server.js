@@ -94,7 +94,7 @@ app.post('/api/v1/library_loans', (request, response) => {
     if (!loan[requiredParameter]) {
       return response
         .status(422)
-        .send({ error: `Expected format: { 'title': <String>, 'author': <String>, 'ISBN': <String>, 'overdue': <String> }. You're missing a "${requiredParameter}" property.` });
+        .send({ error: `Expected format: { 'title': <String>, 'author': <String>, 'ISBN': <String>, 'overdue': <Boolean> }. You're missing a "${requiredParameter}" property.` });
     }
   }
 

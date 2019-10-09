@@ -90,11 +90,11 @@ app.post('/api/v1/patrons', (request, response) => {
 app.post('/api/v1/library_loans', (request, response) => {
   const loan = request.body;
 
-  for (let requiredParameter of ['title', 'author', 'ISBN', 'overdue']) {
+  for (let requiredParameter of ['title', 'author', 'ISBN', 'overdue', 'patron_id']) {
     if (!loan[requiredParameter]) {
       return response
         .status(422)
-        .send({ error: `Expected format: { 'title': <String>, 'author': <String>, 'ISBN': <String>, 'overdue': <String> }. You're missing a "${requiredParameter}" property.` });
+        .send({ error: `Expected format: { 'title': <String>, 'author': <String>, 'ISBN': <String>, 'overdue': <String>, 'patron_id': <String> }. You're missing a "${requiredParameter}" property.` });
     }
   }
 
@@ -106,6 +106,18 @@ app.post('/api/v1/library_loans', (request, response) => {
       response.status(500).json({ error });
     });
 });
+
+app.delete('/api/v1/patrons/:id', (request, response) => {
+  database('patrons').where('id', request.params.id).del()
+    .then(patron => response.status(201).json( `The patron with ID ${request.params.id} has been removed from the database.`))
+    .catch(error => response.status(500).json({error}))
+})
+
+app.delete('/api/v1/library_loans/:id', (request, response) => {
+  database('library_loans').where('id', request.params.id).del()
+    .then((check) => response.status(201).json( `The loaned library item with ID ${request.params.id} has been removed from the database.`))
+    .catch(error => response.status(500).json({error}))
+})
 
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);

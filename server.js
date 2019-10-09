@@ -21,7 +21,7 @@ app.get('/api/v1/patrons', (request, response) => {
       response.status(200).json(patrons);
     })
     .catch(error => {
-      response.status(500).json({ error });
+      response.status(404).json({ error });
     });
 });
 
@@ -47,7 +47,7 @@ app.get('/api/v1/library_loans', (request, response) => {
       response.status(200).json(loans);
     })
     .catch(error => {
-      response.status(500).json({ error });
+      response.status(404).json({ error });
     });
 });
 
